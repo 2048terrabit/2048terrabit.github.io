@@ -1,0 +1,45 @@
+<html>
+
+<head>
+
+
+<title>Steam wishlist price calculator</title>
+
+<link rel="stylesheet" type="text/css" href="css/stylesheet.css">
+<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+<script type="text/javascript" src="js/bootstrap.min.js"></script>
+<script type="text/javascript" src="js/jquery-2.1.4.min.js"></script>
+
+<script>
+
+
+$('document').ready(function(){
+    $("#input1").keyup(function (e) {
+        if (e.keyCode == 13) {
+            // Do something
+            $.get( "http://wishlistcalc-861st.rhcloud.com/calc", { id: "null", cc: "ru" } )
+              .done(function( data ) {
+                alert( "Data Loaded: " + data );
+              });
+        }
+    });
+});
+
+
+</script>
+
+</head>
+
+<body align="center">
+
+<div class="container">
+    <h1>Steam wishlist calculator</h1>
+    <h4>- Alpha 0.1.0 -</h4>
+
+   
+    <input type="text" size="40" id="input1"/>
+</div>
+
+</body>
+
+</html>

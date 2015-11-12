@@ -1,0 +1,18 @@
+.red {
+    background-color: red;
+    color:white;
+}
+
+.yellow {
+    background-color: yellow;
+    color:white;
+}
+
+.green {
+    background-color: green;
+    color:white;
+}
+
+.skip-space {
+    margin: 0.5rem;
+}
