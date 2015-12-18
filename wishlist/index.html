@@ -7,8 +7,8 @@
 
 <link rel="stylesheet" type="text/css" href="css/stylesheet.css">
 <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
-<script type="text/javascript" src="js/bootstrap.min.js"></script>
 <script type="text/javascript" src="js/jquery-2.1.4.min.js"></script>
+<script type="text/javascript" src="js/bootstrap.min.js"></script>
 
 <script>
 
@@ -17,13 +17,30 @@ $('document').ready(function(){
     $("#input1").keyup(function (e) {
         if (e.keyCode == 13) {
             // Do something
-            $.get( "http://wishlistcalc-861st.rhcloud.com/calc", { id: "null", cc: "ru" } )
-              .done(function( data ) {
-                alert( "Data Loaded: " + data );
-              });
+            var id = $("#input1").val();
+            getJSONData(id,'ru');
         }
     });
 });
+
+
+
+function getJSONData (id,cc)
+{
+    $.ajax({
+        url: "http://wishlistcalc-861st.rhcloud.com/calc?id="+ id +"&cc="+ cc +"&callback=?",
+        cache: true,
+        dataType: "json",
+        crossDomain: true,
+        jsonpCallback:'test',
+        success: function(data) {
+            //alert(data.id);
+            trueCallback(data);
+
+        }, 
+        error: function() { console.log("error2"); } 
+    });
+}
 
 
 </script>
@@ -33,11 +50,127 @@ $('document').ready(function(){
 <body align="center">
 
 <div class="container">
+   <section>
     <h1>Steam wishlist calculator</h1>
     <h4>- Alpha 0.1.0 -</h4>
 
    
     <input type="text" size="40" id="input1"/>
+    </section>
+    
+    <section>
+    <div id="main" style="height:400px;"></div>
+    
+    </section>
+    
+    <script src="file:///E:/%23FTP/GitHub/2048terrabit/2048terrabit.github.io/wishlist/js/echarts.js"></script>
+    <script src="file:///E:/%23FTP/GitHub/2048terrabit/2048terrabit.github.io/wishlist/js/chart/pie.js"></script>
+    
+    <script>
+        
+    /*$( document ).ready(function() {
+        
+        $.ajax({
+            url: "http://wishlistcalc-861st.rhcloud.com/calc?id=2048terrabit&cc=ru&callback=?",
+            cache: true,
+            dataType: "json",
+            crossDomain: true,
+            jsonpCallback:'test',
+            success: function(data) {
+                //alert(data.id);
+                trueCallback(data);
+                
+            }, 
+            error: function() { console.log("error2"); } 
+        });
+    });*/
+        
+    </script>
+    
+    <script>
+    
+    function trueCallback(data)
+    {
+        var total_price = 0;
+        var total_discount = 0;
+        
+        total_price = data.total_price;
+        total_discount = data.total_discount;
+
+        require.config({
+                paths: {
+                    echarts: 'http://echarts.baidu.com/build/dist'
+                }
+            });
+
+        require([
+                'echarts',
+                'echarts/chart/line',
+                'echarts/chart/pie',
+                'echarts/chart/bar'
+
+        ],function(ec){
+
+            var myChart = ec.init(document.getElementById('main'));
+            option = {
+                animation : false,
+                tooltip : {
+                    trigger: 'item',
+                    formatter: "{b} <br> {c} ({d}%)"
+                },
+                legend: {
+                    orient : 'vertical',
+                    x : 'left',
+                    data:['Discount','Total price']
+                },
+                toolbox: {
+                    show : true,
+                    feature : {
+                        saveAsImage : {show: true}
+                    }
+                },
+                //calculable : true,
+                series : [
+                    {
+                        name:'Steam games',
+                        type:'pie',
+                        radius : ['50%', '70%'],
+                        /*itemStyle : {
+                            normal : {
+                                label : {
+                                    show : false
+                                },
+                                labelLine : {
+                                    show : false
+                                }
+                            },
+                            emphasis : {
+                                label : {
+                                    show : true,
+                                    position : 'center',
+                                    textStyle : {
+                                        fontSize : '30',
+                                        fontWeight : 'bold'
+                                    }
+                                }
+                            }
+                        },*/
+                        data:[
+                            {value:total_discount, name:'Discount', itemStyle:{normal:{color:"#a4d00e"}} },
+                            {value:total_price, name:'Total price', itemStyle:{normal:{color:"#45bcf5"}} }
+                        ]
+                    }
+                ]
+            };
+        
+        myChart.setOption(option);
+        });
+    }
+
+        
+    
+    </script>
+    
 </div>
 
 </body>
