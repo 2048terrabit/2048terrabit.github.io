@@ -50,7 +50,7 @@ function getJSONData (id,cc)
 <body align="center">
 
 <div class="container">
-   <section>
+   <section style="height:200px;">
     <h1>Steam wishlist calculator</h1>
     <h4>- Alpha 0.1.0 -</h4>
 
@@ -59,8 +59,8 @@ function getJSONData (id,cc)
     </section>
     
     <section>
-    <div id="main" style="height:400px;"></div>
-    
+    <div class="col-lg-6"><div id="graphGames" style="height:350px;"></div></div>
+    <div class="col-lg-6"><div id="graphPrice" style="height:350px;"></div></div>    
     </section>
     
     <script src="js/echarts.js"></script>
@@ -91,11 +91,27 @@ function getJSONData (id,cc)
     
     function trueCallback(data)
     {
+        // Price Graph
         var total_price = 0;
         var total_discount = 0;
         
         total_price = data.total_price;
         total_discount = data.total_discount;
+        
+        // Games Graph
+        var normalGames = 0;
+        var discounted = 0;
+        var free = 0;
+        var f2p = 0;
+        var other = 0;
+        var noprice = 0;
+        
+        normalGames = data.count_total - data.count_discounted - data.count_f2p - data.count_free - data.count_noprice - data.count_unknown;
+        discounted = data.count_discounted;
+        free = data.count_free;
+        f2p = data.count_f2p;
+        other = data.count_unknown;
+        noprice = data.count_noprice;
 
         require.config({
                 paths: {
@@ -109,10 +125,11 @@ function getJSONData (id,cc)
                 'echarts/chart/pie',
                 'echarts/chart/bar'
 
-        ],function(ec){
+        ],function(ec) {
 
-            var myChart = ec.init(document.getElementById('main'));
-            option = {
+            var priceChart = ec.init(document.getElementById('graphPrice'));
+            var gamesChart = ec.init(document.getElementById('graphGames'));
+            priceOption = {
                 animation : false,
                 tooltip : {
                     trigger: 'item',
@@ -162,8 +179,44 @@ function getJSONData (id,cc)
                     }
                 ]
             };
+            
+            gamesOption = {
+                animation : false,
+                tooltip : {
+                    trigger: 'item',
+                    formatter: "{b} <br> {c} ({d}%)"
+                },
+                legend: {
+                    orient : 'vertical',
+                    x : 'left',
+                    data:['Free','Free 2 Play','Discounted','Without Discount','Without Price','Other']
+                },
+                toolbox: {
+                    show : true,
+                    feature : {
+                        saveAsImage : {show: true}
+                    }
+                },
+                //calculable : true,
+                series : [
+                    {
+                        name:'Steam games',
+                        type:'pie',
+                        radius : ['50%', '70%'],
+                        data:[
+                            {value:free, name:'Free', itemStyle:{normal:{color:"#eeeeee"}} },
+                            {value:f2p, name:'Free 2 Play', itemStyle:{normal:{color:"#a1c3e1"}} },
+                            {value:discounted, name:'Discounted', itemStyle:{normal:{color:"#a4d00e"}} },
+                            {value:normalGames, name:'Without Discount', itemStyle:{normal:{color:"#45bcf5"}} },
+                            {value:noprice, name:'Without Price', itemStyle:{normal:{color:"#5f5f5f"}} },
+                            {value:other, name:'Other', itemStyle:{normal:{color:"#474747"}} }
+                        ]
+                    }
+                ]
+            };
         
-        myChart.setOption(option);
+            priceChart.setOption(priceOption);
+            gamesChart.setOption(gamesOption);
         });
     }
 
