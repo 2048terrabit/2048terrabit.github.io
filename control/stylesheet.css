@@ -1,0 +1,92 @@
+body {
+    background-color: gainsboro;
+    font-family: sans-serif;
+}
+
+
+/* GAUGE */
+.gauge {
+    position: relative;
+    width:10em;
+    height:5em;
+    
+    border-radius: 5em 5em 0 0;
+    background-color: #41b7d8;
+    
+    margin: 20px;
+    
+    font-size: 12;
+}
+
+.gauge > .arrow-container {
+    position: absolute;
+    
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 25%;
+    
+    width:50%;
+    height:100%;
+}
+
+/* Круг в центре */
+.gauge > .arrow-container:after {
+    position: absolute;
+    left: 50%;
+    top: 100%;
+    width: 37%;
+    height: 37%;
+    
+    background: #fff;
+    border-radius: 50%;
+    
+    content: "";
+    
+    transform: translate(-50%, -50%);
+    z-index: 10;
+    
+    box-shadow: 0 0 10px rgba(0,0,0,0.4);
+}
+
+/* Стрелка */
+.gauge > .arrow-container > .arrow {
+    position: absolute;
+    width: 8%;
+    height: 95%;
+    left: 46%;
+    top: 5%;
+    
+    background: #fff;
+    border-radius: 0.5em 0.5em 0 0;
+    
+    transform-origin: 50% 100%;
+    z-index: 8;
+    
+    box-shadow: 0 0 10px rgba(0,0,0,0.3);
+}
+
+/* Текущее значение, над стрелкой */
+.gauge > .arrow-container > .arrow > .value {
+    
+    position: absolute;
+    text-align: center;
+    transform: translate(-46%, -105%);
+}
+
+/* Левое значение */
+.gauge > .min {
+    position: absolute;
+    top: 105%;
+    
+    text-align: left;
+}
+
+/* Правое значение */
+.gauge > .max {
+    position: absolute;
+    top: 105%;
+    
+    text-align: right;
+    width: 100%;
+}
