@@ -13,10 +13,11 @@
 <script>
 
 
-$('document').ready(function(){
+$('document').ready(function() {
     $("#input1").keyup(function (e) {
+
+        // When 'Enter' key pressed in input field.
         if (e.keyCode == 13) {
-            // Do something
             var id = $("#input1").val();
             getJSONData(id,'ru');
         }
@@ -34,9 +35,8 @@ function getJSONData (id,cc)
         crossDomain: true,
         jsonpCallback:'test',
         success: function(data) {
-            //alert(data.id);
-            trueCallback(data);
 
+            trueCallback(data);
         }, 
         error: function() { console.log("error2"); } 
     });
@@ -67,27 +67,6 @@ function getJSONData (id,cc)
     <script src="js/chart/pie.js"></script>
     
     <script>
-        
-    /*$( document ).ready(function() {
-        
-        $.ajax({
-            url: "http://wishlistcalc-861st.rhcloud.com/calc?id=2048terrabit&cc=ru&callback=?",
-            cache: true,
-            dataType: "json",
-            crossDomain: true,
-            jsonpCallback:'test',
-            success: function(data) {
-                //alert(data.id);
-                trueCallback(data);
-                
-            }, 
-            error: function() { console.log("error2"); } 
-        });
-    });*/
-        
-    </script>
-    
-    <script>
     
     function trueCallback(data)
     {
@@ -115,7 +94,7 @@ function getJSONData (id,cc)
 
         require.config({
                 paths: {
-                    echarts: 'http://echarts.baidu.com/build/dist'
+                    echarts: 'js/'
                 }
             });
 
