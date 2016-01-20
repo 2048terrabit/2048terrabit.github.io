@@ -52,10 +52,10 @@ function getJSONData (id,cc)
 <div class="container">
    <section style="height:200px;">
     <h1>Steam wishlist calculator</h1>
-    <h4>- Alpha 0.1.0 -</h4>
+    <h4>- Alpha 0.1.1 -</h4>
 
    
-    <input type="text" size="40" id="input1"/>
+    <input type="text" size="40" id="input1" placeholder="Steam Profile ID"/>
     </section>
     
     <section>
@@ -131,26 +131,6 @@ function getJSONData (id,cc)
                         name:'Steam games',
                         type:'pie',
                         radius : ['50%', '70%'],
-                        /*itemStyle : {
-                            normal : {
-                                label : {
-                                    show : false
-                                },
-                                labelLine : {
-                                    show : false
-                                }
-                            },
-                            emphasis : {
-                                label : {
-                                    show : true,
-                                    position : 'center',
-                                    textStyle : {
-                                        fontSize : '30',
-                                        fontWeight : 'bold'
-                                    }
-                                }
-                            }
-                        },*/
                         data:[
                             {value:total_discount, name:'Discount', itemStyle:{normal:{color:"#a4d00e"}} },
                             {value:total_price, name:'Total price', itemStyle:{normal:{color:"#45bcf5"}} }
