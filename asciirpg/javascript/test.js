@@ -30,36 +30,14 @@
     objectList = {};
     move_channel = dispatcher.subscribe('player');
     move_channel.bind('signed_in', function(msg) {
-      console.log("Movement update incoming:");
       console.log("Player with id joined: " + msg.id);
+      console.log(msg);
       return objectList[msg.id + ""] = msg;
     });
     return $(function() {
       var ac, animtick, curPlayer, frame2, handlePlayer, player_data, t, uid, updateTile;
       ac = new cc(document.getElementById("canvas"), document.getElementById("tiles"));
       ac.clear();
-      dispatcher.trigger('level.map', 'nothing', function(map) {
-        var i, results, x, y;
-        results = [];
-        for (x = i = 0; i <= 19; x = ++i) {
-          results.push((function() {
-            var j, results1;
-            results1 = [];
-            for (y = j = 0; j <= 19; y = ++j) {
-              if (map[x][y] === 1) {
-                ac.tile(0, 0, x, y);
-              }
-              if (map[x][y] === 0) {
-                results1.push(ac.tile(1, 0, x, y));
-              } else {
-                results1.push(void 0);
-              }
-            }
-            return results1;
-          })());
-        }
-        return results;
-      });
       frame2 = true;
       updateTile = function(tile, pos) {
         if (frame2) {
@@ -71,17 +49,45 @@
         }
       };
       curPlayer = null;
-      animtick = function() {
-        if (curPlayer) {
-          updateTile([8, 0], curPlayer.pos);
-          return frame2 = !frame2;
-        }
-      };
-      setInterval(animtick, 500);
       handlePlayer = function(ply) {
         console.log(ply);
         curPlayer = ply;
-        return updateTile([8, 0], curPlayer.pos);
+        updateTile([8, 0], curPlayer.pos);
+        dispatcher.trigger('level.get_map', {
+          player_uid: curPlayer.uid
+        }, function(map) {
+          var j, results, x, y;
+          results = [];
+          for (x = j = 0; j <= 19; x = ++j) {
+            results.push((function() {
+              var k, results1;
+              results1 = [];
+              for (y = k = 0; k <= 19; y = ++k) {
+                if (map[x][y] === 1) {
+                  ac.tile(0, 0, x, y);
+                }
+                if (map[x][y] === 0) {
+                  results1.push(ac.tile(1, 0, x, y));
+                } else {
+                  results1.push(void 0);
+                }
+              }
+              return results1;
+            })());
+          }
+          return results;
+        });
+        return dispatcher.trigger('level.get_players', {
+          player_uid: curPlayer.uid
+        }, function(players) {
+          var j, len, results, x;
+          results = [];
+          for (j = 0, len = players.length; j < len; j++) {
+            x = players[j];
+            results.push(console.log(x));
+          }
+          return results;
+        });
       };
       if (uid = localStorage.getItem('player_uid')) {
         player_data = {
@@ -104,6 +110,18 @@
           return console.log(error_msg);
         });
       }
+      animtick = function() {
+        var i, j, len;
+        if (curPlayer) {
+          updateTile([8, 0], curPlayer.pos);
+          for (j = 0, len = objectList.length; j < len; j++) {
+            i = objectList[j];
+            updateTile([8, 1], i.pos);
+          }
+          frame2 = !frame2;
+        }
+        return setInterval(animtick, 500);
+      };
       t = 0;
       $(document).bind("keydown", function(e) {
         var dir, dirx, diry;
@@ -142,10 +160,10 @@
       });
       return $('#reqmap').on('click', function() {
         return dispatcher.trigger('level.map', 'nothing', function(map) {
-          var i, j, x, y;
+          var j, k, x, y;
           console.log(map);
-          for (x = i = 0; i <= 19; x = ++i) {
-            for (y = j = 0; j <= 19; y = ++j) {
+          for (x = j = 0; j <= 19; x = ++j) {
+            for (y = k = 0; k <= 19; y = ++k) {
               if (map[x][y] === 1) {
                 ac.tile(0, 0, x, y);
               }

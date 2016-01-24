@@ -25,29 +25,18 @@ dispatcher.on_open = (data) -> # если соединение с серверо
 
   move_channel = dispatcher.subscribe('player')
   move_channel.bind 'signed_in', (msg) ->
-    console.log "Movement update incoming:"
     console.log "Player with id joined: " + msg.id
+    console.log msg
     objectList[msg.id+""] = msg
 
   $ ->
-
+    #
     # Settup canvas class
+    #
     ac = new cc( document.getElementById("canvas"), document.getElementById("tiles"))
     ac.clear()
-    
-
-    # Initial map loading & drawing
-    dispatcher.trigger 'level.map', 'nothing', (map) ->
-      for x in [0..19]
-        # ...
-        for y in [0..19]
-          # ...
-          ac.tile 0, 0, x, y if map[x][y] == 1
-          ac.tile 1, 0, x, y if map[x][y] == 0
 
 
-
-    # Update player tile
     frame2 = true
 
     updateTile = (tile,pos) ->
@@ -58,21 +47,34 @@ dispatcher.on_open = (data) -> # если соединение с серверо
         ac.tile 1, 0, curPlayer.pos.x, curPlayer.pos.y
         ac.tile tile[0]+1, tile[1], curPlayer.pos.x, curPlayer.pos.y
 
+
+
+    #
+    # Login or registration of player
+    #
     curPlayer = null
-    
-    animtick = ->
-      if curPlayer
-        updateTile( [8,0], curPlayer.pos)
-        frame2 = !frame2
-    setInterval animtick, 500
 
-
-
-    # Login of player or creating new player
     handlePlayer = (ply) ->
       console.log ply
       curPlayer = ply
       updateTile( [8,0], curPlayer.pos)
+
+
+      # Initial map loading & drawing
+      dispatcher.trigger 'level.get_map', { player_uid: curPlayer.uid }, (map) ->
+        for x in [0..19]
+          # ...
+          for y in [0..19]
+            # ...
+            ac.tile 0, 0, x, y if map[x][y] == 1
+            ac.tile 1, 0, x, y if map[x][y] == 0
+
+
+      # Get info about players on map
+      dispatcher.trigger 'level.get_players', { player_uid: curPlayer.uid }, (players) ->
+        for x in players
+          console.log x
+
 
     # Check for saved player id
     if uid = localStorage.getItem('player_uid')
@@ -106,7 +108,27 @@ dispatcher.on_open = (data) -> # если соединение с серверо
 
 
 
+
+    #
+    # Animation
+    #    
+    animtick = ->
+      if curPlayer
+        updateTile( [8,0], curPlayer.pos)
+
+        # Update other players
+        for i in objectList
+          updateTile [8,1], i.pos
+        
+
+
+        frame2 = !frame2
+      setInterval animtick, 500
+    
+
+    #
     # Arrow button movement
+    #
     t = 0
     $(document).bind "keydown", (e) ->
       dir = null
