@@ -120,20 +120,22 @@
         if (e.keyCode === 40) {
           dir = "down";
         }
-        e.preventDefault();
-        if (dir && t - new Date().getTime() < 0) {
-          dispatcher.trigger('player.move', {
-            player_uid: curPlayer.uid,
-            direction: dir
-          }, function(obj) {
-            console.log(obj);
-            ac.tile(1, 0, curPlayer.pos.x, curPlayer.pos.y);
-            curPlayer.pos = obj.pos;
-            return updateTile([8, 0], curPlayer.pos);
-          }, function(error_msg) {
-            return console.log(error_msg);
-          });
-          return t = new Date().getTime() + 300;
+        if (dir) {
+          e.preventDefault();
+          if (t - new Date().getTime() < 0) {
+            dispatcher.trigger('player.move', {
+              player_uid: curPlayer.uid,
+              direction: dir
+            }, function(obj) {
+              console.log(obj);
+              ac.tile(1, 0, curPlayer.pos.x, curPlayer.pos.y);
+              curPlayer.pos = obj.pos;
+              return updateTile([8, 0], curPlayer.pos);
+            }, function(error_msg) {
+              return console.log(error_msg);
+            });
+            return t = new Date().getTime() + 300;
+          }
         }
       });
       return $('#reqmap').on('click', function() {

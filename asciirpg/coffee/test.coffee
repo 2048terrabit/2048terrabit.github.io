@@ -117,22 +117,24 @@ dispatcher.on_open = (data) -> # если соединение с серверо
       if e.keyCode == 40
         dir = "down"
 
-      e.preventDefault()
 
-      if dir && t - new Date().getTime() < 0
-        dispatcher.trigger 'player.move', { player_uid: curPlayer.uid, direction: dir }, (obj) ->
-          console.log obj
-          # clear last position
-          ac.tile 1, 0, curPlayer.pos.x, curPlayer.pos.y
+      if dir
+        e.preventDefault()
+        
+        if t - new Date().getTime() < 0
+          dispatcher.trigger 'player.move', { player_uid: curPlayer.uid, direction: dir }, (obj) ->
+            console.log obj
+            # clear last position
+            ac.tile 1, 0, curPlayer.pos.x, curPlayer.pos.y
 
-          # update player
-          curPlayer.pos = obj.pos
-          updateTile([8,0], curPlayer.pos)
+            # update player
+            curPlayer.pos = obj.pos
+            updateTile([8,0], curPlayer.pos)
 
-        , (error_msg) ->
-          console.log error_msg
+          , (error_msg) ->
+            console.log error_msg
 
-        t = new Date().getTime() + 300
+          t = new Date().getTime() + 300
 
 
     $('#reqmap').on 'click', ->
