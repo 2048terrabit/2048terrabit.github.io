@@ -23,11 +23,20 @@ dispatcher.on_open = (data) -> # если соединение с серверо
 
   objectList = {}
 
-  move_channel = dispatcher.subscribe('player')
-  move_channel.bind 'signed_in', (msg) ->
+  sign_channel = dispatcher.subscribe('player')
+  sign_channel.bind 'signed_in', (msg) ->
     console.log "Player with id joined: " + msg.id
     console.log msg
     #objectList[msg.id+""] = msg
+
+  move_channel = dispatcher.subscribe('player')
+  move_channel.bind 'move', (msg) ->
+    console.log "Player with id moved: " + msg.id
+    console.log msg
+    if curPlayer.id == msg.id
+      curPlayer.pos = msg.pos
+    else
+      objectList[msg.id+""] = msg
 
   $ ->
     #

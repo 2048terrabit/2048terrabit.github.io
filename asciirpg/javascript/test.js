@@ -25,13 +25,23 @@
   dispatcher = new WebSocketRails('78.47.206.129/websocket');
 
   dispatcher.on_open = function(data) {
-    var move_channel, objectList;
+    var move_channel, objectList, sign_channel;
     console.log('Connection has been established');
     objectList = {};
-    move_channel = dispatcher.subscribe('player');
-    move_channel.bind('signed_in', function(msg) {
+    sign_channel = dispatcher.subscribe('player');
+    sign_channel.bind('signed_in', function(msg) {
       console.log("Player with id joined: " + msg.id);
       return console.log(msg);
+    });
+    move_channel = dispatcher.subscribe('player');
+    move_channel.bind('move', function(msg) {
+      console.log("Player with id moved: " + msg.id);
+      console.log(msg);
+      if (curPlayer.id === msg.id) {
+        return curPlayer.pos = msg.pos;
+      } else {
+        return objectList[msg.id + ""] = msg;
+      }
     });
     return $(function() {
       var ac, animtick, curPlayer, frame2, handlePlayer, player_data, t, uid, updateTile;
