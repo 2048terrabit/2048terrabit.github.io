@@ -31,8 +31,7 @@
     move_channel = dispatcher.subscribe('player');
     move_channel.bind('signed_in', function(msg) {
       console.log("Player with id joined: " + msg.id);
-      console.log(msg);
-      return objectList[msg.id + ""] = msg;
+      return console.log(msg);
     });
     return $(function() {
       var ac, animtick, curPlayer, frame2, handlePlayer, player_data, t, uid, updateTile;
@@ -41,52 +40,43 @@
       frame2 = true;
       updateTile = function(tile, pos) {
         if (frame2) {
-          ac.tile(1, 0, curPlayer.pos.x, curPlayer.pos.y);
-          return ac.tile(tile[0], tile[1], curPlayer.pos.x, curPlayer.pos.y);
+          ac.tile(1, 0, pos.x, pos.y);
+          return ac.tile(tile[0], tile[1], pos.x, pos.y);
         } else {
-          ac.tile(1, 0, curPlayer.pos.x, curPlayer.pos.y);
-          return ac.tile(tile[0] + 1, tile[1], curPlayer.pos.x, curPlayer.pos.y);
+          ac.tile(1, 0, pos.x, pos.y);
+          return ac.tile(tile[0] + 1, tile[1], pos.x, pos.y);
         }
       };
       curPlayer = null;
       handlePlayer = function(ply) {
         console.log(ply);
         curPlayer = ply;
-        updateTile([8, 0], curPlayer.pos);
         dispatcher.trigger('level.get_map', {
           player_uid: curPlayer.uid
         }, function(map) {
-          var j, results, x, y;
-          results = [];
-          for (x = j = 0; j <= 19; x = ++j) {
-            results.push((function() {
-              var k, results1;
-              results1 = [];
-              for (y = k = 0; k <= 19; y = ++k) {
-                if (map[x][y] === 1) {
-                  ac.tile(0, 0, x, y);
-                }
-                if (map[x][y] === 0) {
-                  results1.push(ac.tile(1, 0, x, y));
-                } else {
-                  results1.push(void 0);
-                }
+          var i, j, x, y;
+          for (x = i = 0; i <= 19; x = ++i) {
+            for (y = j = 0; j <= 19; y = ++j) {
+              if (map[x][y] === 1) {
+                ac.tile(0, 0, x, y);
               }
-              return results1;
-            })());
+              if (map[x][y] === 0) {
+                ac.tile(1, 0, x, y);
+              }
+            }
           }
-          return results;
+          return updateTile([8, 0], curPlayer.pos);
         });
         return dispatcher.trigger('level.get_players', {
           player_uid: curPlayer.uid
         }, function(players) {
-          var j, len, results, x;
-          results = [];
-          for (j = 0, len = players.length; j < len; j++) {
-            x = players[j];
-            results.push(console.log(x));
+          var i, len, x;
+          console.log("Got players:");
+          for (i = 0, len = players.length; i < len; i++) {
+            x = players[i];
+            objectList[x.id + ""] = x;
           }
-          return results;
+          return console.log(objectList);
         });
       };
       if (uid = localStorage.getItem('player_uid')) {
@@ -111,17 +101,17 @@
         });
       }
       animtick = function() {
-        var i, j, len;
+        var k, v;
         if (curPlayer) {
           updateTile([8, 0], curPlayer.pos);
-          for (j = 0, len = objectList.length; j < len; j++) {
-            i = objectList[j];
-            updateTile([8, 1], i.pos);
+          for (k in objectList) {
+            v = objectList[k];
+            updateTile([8, 1], v.pos);
           }
-          frame2 = !frame2;
+          return frame2 = !frame2;
         }
-        return setInterval(animtick, 500);
       };
+      setInterval(animtick, 500);
       t = 0;
       $(document).bind("keydown", function(e) {
         var dir, dirx, diry;
@@ -160,10 +150,10 @@
       });
       return $('#reqmap').on('click', function() {
         return dispatcher.trigger('level.map', 'nothing', function(map) {
-          var j, k, x, y;
+          var i, j, x, y;
           console.log(map);
-          for (x = j = 0; j <= 19; x = ++j) {
-            for (y = k = 0; k <= 19; y = ++k) {
+          for (x = i = 0; i <= 19; x = ++i) {
+            for (y = j = 0; j <= 19; y = ++j) {
               if (map[x][y] === 1) {
                 ac.tile(0, 0, x, y);
               }

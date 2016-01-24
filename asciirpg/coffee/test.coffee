@@ -27,7 +27,7 @@ dispatcher.on_open = (data) -> # если соединение с серверо
   move_channel.bind 'signed_in', (msg) ->
     console.log "Player with id joined: " + msg.id
     console.log msg
-    objectList[msg.id+""] = msg
+    #objectList[msg.id+""] = msg
 
   $ ->
     #
@@ -41,11 +41,11 @@ dispatcher.on_open = (data) -> # если соединение с серверо
 
     updateTile = (tile,pos) ->
       if frame2
-        ac.tile 1, 0, curPlayer.pos.x, curPlayer.pos.y
-        ac.tile tile[0], tile[1], curPlayer.pos.x, curPlayer.pos.y
+        ac.tile 1, 0, pos.x, pos.y
+        ac.tile tile[0], tile[1], pos.x, pos.y
       else
-        ac.tile 1, 0, curPlayer.pos.x, curPlayer.pos.y
-        ac.tile tile[0]+1, tile[1], curPlayer.pos.x, curPlayer.pos.y
+        ac.tile 1, 0, pos.x, pos.y
+        ac.tile tile[0]+1, tile[1], pos.x, pos.y
 
 
 
@@ -57,7 +57,6 @@ dispatcher.on_open = (data) -> # если соединение с серверо
     handlePlayer = (ply) ->
       console.log ply
       curPlayer = ply
-      updateTile( [8,0], curPlayer.pos)
 
 
       # Initial map loading & drawing
@@ -69,11 +68,17 @@ dispatcher.on_open = (data) -> # если соединение с серверо
             ac.tile 0, 0, x, y if map[x][y] == 1
             ac.tile 1, 0, x, y if map[x][y] == 0
 
+        updateTile( [8,0], curPlayer.pos)
+
 
       # Get info about players on map
       dispatcher.trigger 'level.get_players', { player_uid: curPlayer.uid }, (players) ->
+        console.log "Got players:"
         for x in players
-          console.log x
+          objectList[x.id+""] = x
+        console.log objectList
+
+
 
 
     # Check for saved player id
@@ -117,13 +122,11 @@ dispatcher.on_open = (data) -> # если соединение с серверо
         updateTile( [8,0], curPlayer.pos)
 
         # Update other players
-        for i in objectList
-          updateTile [8,1], i.pos
-        
-
+        for k,v of objectList
+          updateTile( [8,1], v.pos)  
 
         frame2 = !frame2
-      setInterval animtick, 500
+    setInterval animtick, 500
     
 
     #
