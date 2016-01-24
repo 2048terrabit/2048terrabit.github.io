@@ -25,26 +25,11 @@
   dispatcher = new WebSocketRails('78.47.206.129/websocket');
 
   dispatcher.on_open = function(data) {
-    var move_channel, objectList, sign_channel;
     console.log('Connection has been established');
-    objectList = {};
-    sign_channel = dispatcher.subscribe('player');
-    sign_channel.bind('signed_in', function(msg) {
-      console.log("Player with id joined: " + msg.id);
-      return console.log(msg);
-    });
-    move_channel = dispatcher.subscribe('player');
-    move_channel.bind('move', function(msg) {
-      console.log("Player with id moved: " + msg.id);
-      console.log(msg);
-      if (curPlayer.id === msg.id) {
-        return curPlayer.pos = msg.pos;
-      } else {
-        return objectList[msg.id + ""] = msg;
-      }
-    });
     return $(function() {
-      var ac, animtick, curPlayer, frame2, handlePlayer, player_data, t, uid, updateTile;
+      var ac, animtick, curPlayer, frame2, g_map, handlePlayer, move_channel, objectList, player_data, sign_channel, t, uid, updateTile;
+      objectList = {};
+      g_map = null;
       ac = new cc(document.getElementById("canvas"), document.getElementById("tiles"));
       ac.clear();
       frame2 = true;
@@ -57,6 +42,23 @@
           return ac.tile(tile[0] + 1, tile[1], pos.x, pos.y);
         }
       };
+      sign_channel = dispatcher.subscribe('player');
+      sign_channel.bind('signed_in', function(msg) {
+        console.log("Player with id joined: " + msg.id);
+        return console.log(msg);
+      });
+      move_channel = dispatcher.subscribe('player');
+      move_channel.bind('move', function(msg) {
+        console.log("Player with id moved: " + msg.id);
+        console.log(msg);
+        if (curPlayer.id === msg.id) {
+          ac.tile(1, 0, curPlayer.pos.x, curPlayer.pos.y);
+          curPlayer.pos = msg.pos;
+          return updateTile([8, 0], curPlayer.pos);
+        } else {
+          return objectList[msg.id + ""] = msg;
+        }
+      });
       curPlayer = null;
       handlePlayer = function(ply) {
         console.log(ply);
@@ -65,6 +67,7 @@
           player_uid: curPlayer.uid
         }, function(map) {
           var i, j, x, y;
+          g_map = map;
           for (x = i = 0; i <= 19; x = ++i) {
             for (y = j = 0; j <= 19; y = ++j) {
               if (map[x][y] === 1) {
@@ -111,7 +114,17 @@
         });
       }
       animtick = function() {
-        var k, v;
+        var i, j, k, v, x, y;
+        for (x = i = 0; i <= 19; x = ++i) {
+          for (y = j = 0; j <= 19; y = ++j) {
+            if (g_map[x][y] === 1) {
+              ac.tile(0, 0, x, y);
+            }
+            if (g_map[x][y] === 0) {
+              ac.tile(1, 0, x, y);
+            }
+          }
+        }
         if (curPlayer) {
           updateTile([8, 0], curPlayer.pos);
           for (k in objectList) {
@@ -147,10 +160,7 @@
               player_uid: curPlayer.uid,
               direction: dir
             }, function(obj) {
-              console.log(obj);
-              ac.tile(1, 0, curPlayer.pos.x, curPlayer.pos.y);
-              curPlayer.pos = obj.pos;
-              return updateTile([8, 0], curPlayer.pos);
+              return console.log(obj);
             }, function(error_msg) {
               return console.log(error_msg);
             });

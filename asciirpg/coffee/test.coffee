@@ -21,30 +21,17 @@ dispatcher = new WebSocketRails('78.47.206.129/websocket')
 dispatcher.on_open = (data) -> # если соединение с сервером происходит, то мы попадаем в тело функции
   console.log 'Connection has been established'
 
-  objectList = {}
-
-  sign_channel = dispatcher.subscribe('player')
-  sign_channel.bind 'signed_in', (msg) ->
-    console.log "Player with id joined: " + msg.id
-    console.log msg
-    #objectList[msg.id+""] = msg
-
-  move_channel = dispatcher.subscribe('player')
-  move_channel.bind 'move', (msg) ->
-    console.log "Player with id moved: " + msg.id
-    console.log msg
-    if curPlayer.id == msg.id
-      curPlayer.pos = msg.pos
-    else
-      objectList[msg.id+""] = msg
-
   $ ->
+    # Global vars
+    objectList = {}
+    g_map = null
+
+
     #
     # Settup canvas class
     #
     ac = new cc( document.getElementById("canvas"), document.getElementById("tiles"))
     ac.clear()
-
 
     frame2 = true
 
@@ -55,6 +42,29 @@ dispatcher.on_open = (data) -> # если соединение с серверо
       else
         ac.tile 1, 0, pos.x, pos.y
         ac.tile tile[0]+1, tile[1], pos.x, pos.y
+
+        
+
+
+    sign_channel = dispatcher.subscribe('player')
+    sign_channel.bind 'signed_in', (msg) ->
+      console.log "Player with id joined: " + msg.id
+      console.log msg
+      #objectList[msg.id+""] = msg
+
+    move_channel = dispatcher.subscribe('player')
+    move_channel.bind 'move', (msg) ->
+      console.log "Player with id moved: " + msg.id
+      console.log msg
+      if curPlayer.id == msg.id
+        ac.tile 1, 0, curPlayer.pos.x, curPlayer.pos.y
+        curPlayer.pos = msg.pos
+        updateTile( [8,0], curPlayer.pos)
+      else
+        objectList[msg.id+""] = msg
+
+
+
 
 
 
@@ -70,6 +80,7 @@ dispatcher.on_open = (data) -> # если соединение с серверо
 
       # Initial map loading & drawing
       dispatcher.trigger 'level.get_map', { player_uid: curPlayer.uid }, (map) ->
+        g_map = map
         for x in [0..19]
           # ...
           for y in [0..19]
@@ -127,6 +138,13 @@ dispatcher.on_open = (data) -> # если соединение с серверо
     # Animation
     #    
     animtick = ->
+      for x in [0..19]
+        # ...
+        for y in [0..19]
+          # ...
+          ac.tile 0, 0, x, y if g_map[x][y] == 1
+          ac.tile 1, 0, x, y if g_map[x][y] == 0
+
       if curPlayer
         updateTile( [8,0], curPlayer.pos)
 
@@ -164,11 +182,11 @@ dispatcher.on_open = (data) -> # если соединение с серверо
           dispatcher.trigger 'player.move', { player_uid: curPlayer.uid, direction: dir }, (obj) ->
             console.log obj
             # clear last position
-            ac.tile 1, 0, curPlayer.pos.x, curPlayer.pos.y
+            #ac.tile 1, 0, curPlayer.pos.x, curPlayer.pos.y
 
             # update player
-            curPlayer.pos = obj.pos
-            updateTile([8,0], curPlayer.pos)
+            #curPlayer.pos = obj.pos
+            #updateTile([8,0], curPlayer.pos)
 
           , (error_msg) ->
             console.log error_msg
