@@ -126,11 +126,11 @@
           }
         }
         if (curPlayer) {
-          updateTile([8, 0], curPlayer.pos);
           for (k in objectList) {
             v = objectList[k];
             updateTile([8, 1], v.pos);
           }
+          updateTile([8, 0], curPlayer.pos);
           return frame2 = !frame2;
         }
       };

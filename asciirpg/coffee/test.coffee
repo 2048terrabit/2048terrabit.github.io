@@ -43,7 +43,7 @@ dispatcher.on_open = (data) -> # если соединение с серверо
         ac.tile 1, 0, pos.x, pos.y
         ac.tile tile[0]+1, tile[1], pos.x, pos.y
 
-        
+
 
 
     sign_channel = dispatcher.subscribe('player')
@@ -146,11 +146,13 @@ dispatcher.on_open = (data) -> # если соединение с серверо
           ac.tile 1, 0, x, y if g_map[x][y] == 0
 
       if curPlayer
-        updateTile( [8,0], curPlayer.pos)
-
         # Update other players
         for k,v of objectList
-          updateTile( [8,1], v.pos)  
+          updateTile( [8,1], v.pos)
+
+
+        # Update client player
+        updateTile( [8,0], curPlayer.pos) 
 
         frame2 = !frame2
     setInterval animtick, 500
