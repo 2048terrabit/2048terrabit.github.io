@@ -19,12 +19,15 @@ class cc
 dispatcher = new WebSocketRails('78.47.206.129/websocket')
 
 dispatcher.on_open = (data) -> # если соединение с сервером происходит, то мы попадаем в тело функции
-  console.log 'Connection has been established' # прост уведомляем что все хорошо :)
+  console.log 'Connection has been established'
 
-  test_channel = dispatcher.subscribe('test') # то что мы передаем параметром - это название канала; каналы задаются сервером; test - это тестовый канал на серваке, просто будет отвечать сообщениями
-  test_channel.bind 'test_method', (test_msg) -> # так мы биндимся на получение каких-то обновлений по определенному каналу, сервер сам будет решать когда что-то отправлять, при отправке данных по этому каналу будет срабатывать тело этой функции (это общая инфа для всех, если зайти в разных браузерах - инфа будет передана каждому подписанному на этот канал)
-    console.log 'BINDING: public channgel subscribing'
-    console.log test_msg # то что мы указывали в параметре функции - пришло с сервера, обычно это будут js объекты, но может быть все что угодно, в данном случае строка
+  objectList = {}
+
+  move_channel = dispatcher.subscribe('player')
+  move_channel.bind 'signed_in', (msg) ->
+    console.log "Movement update incoming:"
+    console.log "Player with id joined: " + msg.id
+    objectList[msg.id+""] = msg
 
   $ ->
 
@@ -69,7 +72,7 @@ dispatcher.on_open = (data) -> # если соединение с серверо
     handlePlayer = (ply) ->
       console.log ply
       curPlayer = ply
-      ac.tile 8, 0, curPlayer.pos[0], curPlayer.pos[1]
+      updateTile( [8,0], curPlayer.pos)
 
     # Check for saved player id
     if uid = localStorage.getItem('player_uid')
@@ -102,6 +105,8 @@ dispatcher.on_open = (data) -> # если соединение с серверо
         console.log error_msg
 
 
+
+    # Arrow button movement
     t = 0
     $(document).bind "keydown", (e) ->
       dir = null
@@ -120,7 +125,7 @@ dispatcher.on_open = (data) -> # если соединение с серверо
 
       if dir
         e.preventDefault()
-        
+
         if t - new Date().getTime() < 0
           dispatcher.trigger 'player.move', { player_uid: curPlayer.uid, direction: dir }, (obj) ->
             console.log obj

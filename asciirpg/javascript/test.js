@@ -25,12 +25,14 @@
   dispatcher = new WebSocketRails('78.47.206.129/websocket');
 
   dispatcher.on_open = function(data) {
-    var test_channel;
+    var move_channel, objectList;
     console.log('Connection has been established');
-    test_channel = dispatcher.subscribe('test');
-    test_channel.bind('test_method', function(test_msg) {
-      console.log('BINDING: public channgel subscribing');
-      return console.log(test_msg);
+    objectList = {};
+    move_channel = dispatcher.subscribe('player');
+    move_channel.bind('signed_in', function(msg) {
+      console.log("Movement update incoming:");
+      console.log("Player with id joined: " + msg.id);
+      return objectList[msg.id + ""] = msg;
     });
     return $(function() {
       var ac, animtick, curPlayer, frame2, handlePlayer, player_data, t, uid, updateTile;
@@ -79,7 +81,7 @@
       handlePlayer = function(ply) {
         console.log(ply);
         curPlayer = ply;
-        return ac.tile(8, 0, curPlayer.pos[0], curPlayer.pos[1]);
+        return updateTile([8, 0], curPlayer.pos);
       };
       if (uid = localStorage.getItem('player_uid')) {
         player_data = {
