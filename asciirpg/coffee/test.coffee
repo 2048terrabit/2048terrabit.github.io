@@ -43,20 +43,29 @@ dispatcher.on_open = (data) -> # если соединение с серверо
           ac.tile 1, 0, x, y if map[x][y] == 0
 
 
-    # Login of player or creating new player
-    curPlayer = null
+
+    # Update player tile
     frame2 = true
+
+    updateTile = (tile,pos) ->
+      if frame2
+        ac.tile 1, 0, curPlayer.pos.x, curPlayer.pos.y
+        ac.tile tile[0], tile[1], curPlayer.pos.x, curPlayer.pos.y
+      else
+        ac.tile 1, 0, curPlayer.pos.x, curPlayer.pos.y
+        ac.tile tile[0]+1, tile[1], curPlayer.pos.x, curPlayer.pos.y
+
+    curPlayer = null
+    
     animtick = ->
       if curPlayer
-        if frame2
-          ac.tile 1, 0, curPlayer.pos[0], curPlayer.pos[1]
-          ac.tile 8, 0, curPlayer.pos[0], curPlayer.pos[1]
-        else
-          ac.tile 1, 0, curPlayer.pos[0], curPlayer.pos[1]
-          ac.tile 9, 0, curPlayer.pos[0], curPlayer.pos[1]
+        updateTile( [8,0], curPlayer.pos)
         frame2 = !frame2
     setInterval animtick, 500
 
+
+
+    # Login of player or creating new player
     handlePlayer = (ply) ->
       console.log ply
       curPlayer = ply
@@ -110,15 +119,17 @@ dispatcher.on_open = (data) -> # если соединение с серверо
       if dir
         dispatcher.trigger 'player.move', { player_uid: curPlayer.uid, direction: dir }, (obj) ->
           console.log obj
-          ac.tile 1, 0, curPlayer.pos[0], curPlayer.pos[1]
-          curPlayer.pos[0] = obj.pos.x
-          curPlayer.pos[1] = obj.pos.y
+          # clear last position
+          ac.tile 1, 0, curPlayer.pos.x, curPlayer.pos.y
+
+          # update player
+          curPlayer.pos = obj.pos
+          updateTile([8,0], curPlayer.pos)
 
         , (error_msg) ->
           console.log error_msg
 
 
-      
     $('#reqmap').on 'click', ->
       dispatcher.trigger 'level.map', 'nothing', (map) ->
         console.log map

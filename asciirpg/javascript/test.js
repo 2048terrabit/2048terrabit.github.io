@@ -33,7 +33,7 @@
       return console.log(test_msg);
     });
     return $(function() {
-      var ac, animtick, curPlayer, frame2, handlePlayer, player_data, uid;
+      var ac, animtick, curPlayer, frame2, handlePlayer, player_data, uid, updateTile;
       ac = new cc(document.getElementById("canvas"), document.getElementById("tiles"));
       ac.clear();
       dispatcher.trigger('level.map', 'nothing', function(map) {
@@ -58,17 +58,20 @@
         }
         return results;
       });
-      curPlayer = null;
       frame2 = true;
+      updateTile = function(tile, pos) {
+        if (frame2) {
+          ac.tile(1, 0, curPlayer.pos.x, curPlayer.pos.y);
+          return ac.tile(tile[0], tile[1], curPlayer.pos.x, curPlayer.pos.y);
+        } else {
+          ac.tile(1, 0, curPlayer.pos.x, curPlayer.pos.y);
+          return ac.tile(tile[0] + 1, tile[1], curPlayer.pos.x, curPlayer.pos.y);
+        }
+      };
+      curPlayer = null;
       animtick = function() {
         if (curPlayer) {
-          if (frame2) {
-            ac.tile(1, 0, curPlayer.pos[0], curPlayer.pos[1]);
-            ac.tile(8, 0, curPlayer.pos[0], curPlayer.pos[1]);
-          } else {
-            ac.tile(1, 0, curPlayer.pos[0], curPlayer.pos[1]);
-            ac.tile(9, 0, curPlayer.pos[0], curPlayer.pos[1]);
-          }
+          updateTile([8, 0], curPlayer.pos);
           return frame2 = !frame2;
         }
       };
@@ -122,9 +125,9 @@
             direction: dir
           }, function(obj) {
             console.log(obj);
-            ac.tile(1, 0, curPlayer.pos[0], curPlayer.pos[1]);
-            curPlayer.pos[0] = obj.pos.x;
-            return curPlayer.pos[1] = obj.pos.y;
+            ac.tile(1, 0, curPlayer.pos.x, curPlayer.pos.y);
+            curPlayer.pos = obj.pos;
+            return updateTile([8, 0], curPlayer.pos);
           }, function(error_msg) {
             return console.log(error_msg);
           });
