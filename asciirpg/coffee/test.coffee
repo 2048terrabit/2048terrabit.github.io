@@ -1,3 +1,21 @@
+
+
+class cc
+  constructor: (c, img) ->
+    @c = c
+    @ctx = c.getContext '2d'
+    @image = img
+  clear: ->
+    @ctx.fillStyle = "#fff"
+    @ctx.fillRect(1,1,@c.width,@c.height)
+  tile: (tx,ty, cx,cy) ->
+    @ctx.drawImage(@image, tx*16,ty*16,16,16,cx*16,cy*16,16,16)
+
+
+
+
+
+
 dispatcher = new WebSocketRails('78.47.206.129/websocket')
 
 dispatcher.on_open = (data) -> # если соединение с сервером происходит, то мы попадаем в тело функции
@@ -9,8 +27,36 @@ dispatcher.on_open = (data) -> # если соединение с серверо
     console.log test_msg # то что мы указывали в параметре функции - пришло с сервера, обычно это будут js объекты, но может быть все что угодно, в данном случае строка
 
   $ ->
-    $('button').on 'click', ->
-      console.log 'send test msg from client'
 
-      dispatcher.trigger 'test', 'just some test string', (test) -> # мы триггерим событие, и все кто подписан на этот канал (включая нас, ведь мы подписались на него выше) получат ответ после обработки этого сообщения сервером, вторым параметром мы передаем какие-либо данные серваку (обычно js объект, но в данном случае это не важно, сервер просто отвечает строкой вне зависимости от того, что ему передать)
-        console.log test # опять же, что было праметром функции - пришло с сервера; это сообщение только для нас, и никого другого (обычно,  я думаю, тут должно быть просто сообщение об успешном приеме команды сервером)
+    ac = new cc( document.getElementById("canvas"), document.getElementById("tiles"))
+    ac.clear()
+    ac.tile 0, 0, 3, 0
+    #alert "krk"
+    
+
+    dispatcher.trigger 'level.map', 'nothing', (map) ->
+      for x in [0..19]
+        # ...
+        for y in [0..19]
+          # ...
+          ac.tile 0, 0, x, y if map[x][y] == 1
+          ac.tile 1, 0, x, y if map[x][y] == 0
+
+
+    $('#testbut').on 'click', ->
+      console.log 'send test msg from client'
+      cc.test
+      #ctx.fillRect(16,16,32,32)
+      
+    $('#reqmap').on 'click', ->
+      dispatcher.trigger 'level.map', 'nothing', (map) ->
+        console.log map
+        for x in [0..19]
+          # ...
+          for y in [0..19]
+            # ...
+            ac.tile 0, 0, x, y if map[x][y] == 1
+            ac.tile 1, 0, x, y if map[x][y] == 0
+        
+        
+        $('#map').text "test"
