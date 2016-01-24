@@ -102,6 +102,7 @@ dispatcher.on_open = (data) -> # если соединение с серверо
         console.log error_msg
 
 
+    t = 0
     $(document).bind "keydown", (e) ->
       dir = null
       dirx = 0
@@ -116,7 +117,9 @@ dispatcher.on_open = (data) -> # если соединение с серверо
       if e.keyCode == 40
         dir = "down"
 
-      if dir
+      e.preventDefault()
+
+      if dir && t - new Date().getTime() < 0
         dispatcher.trigger 'player.move', { player_uid: curPlayer.uid, direction: dir }, (obj) ->
           console.log obj
           # clear last position
@@ -128,6 +131,8 @@ dispatcher.on_open = (data) -> # если соединение с серверо
 
         , (error_msg) ->
           console.log error_msg
+
+        t = new Date().getTime() + 300
 
 
     $('#reqmap').on 'click', ->

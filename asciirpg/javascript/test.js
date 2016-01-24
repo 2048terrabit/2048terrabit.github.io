@@ -33,7 +33,7 @@
       return console.log(test_msg);
     });
     return $(function() {
-      var ac, animtick, curPlayer, frame2, handlePlayer, player_data, uid, updateTile;
+      var ac, animtick, curPlayer, frame2, handlePlayer, player_data, t, uid, updateTile;
       ac = new cc(document.getElementById("canvas"), document.getElementById("tiles"));
       ac.clear();
       dispatcher.trigger('level.map', 'nothing', function(map) {
@@ -102,6 +102,7 @@
           return console.log(error_msg);
         });
       }
+      t = 0;
       $(document).bind("keydown", function(e) {
         var dir, dirx, diry;
         dir = null;
@@ -119,8 +120,9 @@
         if (e.keyCode === 40) {
           dir = "down";
         }
-        if (dir) {
-          return dispatcher.trigger('player.move', {
+        e.preventDefault();
+        if (dir && t - new Date().getTime() < 0) {
+          dispatcher.trigger('player.move', {
             player_uid: curPlayer.uid,
             direction: dir
           }, function(obj) {
@@ -131,6 +133,7 @@
           }, function(error_msg) {
             return console.log(error_msg);
           });
+          return t = new Date().getTime() + 300;
         }
       });
       return $('#reqmap').on('click', function() {
