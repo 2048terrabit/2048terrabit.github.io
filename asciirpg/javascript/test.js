@@ -11,7 +11,7 @@
 
     cc.prototype.clear = function() {
       this.ctx.fillStyle = "#fff";
-      return this.ctx.fillRect(1, 1, this.c.width, this.c.height);
+      return this.ctx.fillRect(0, 0, this.c.width, this.c.height);
     };
 
     cc.prototype.tile = function(tx, ty, cx, cy) {
@@ -33,10 +33,9 @@
       return console.log(test_msg);
     });
     return $(function() {
-      var ac;
+      var ac, animtick, curPlayer, frame2, handlePlayer, player_data, uid;
       ac = new cc(document.getElementById("canvas"), document.getElementById("tiles"));
       ac.clear();
-      ac.tile(0, 0, 3, 0);
       dispatcher.trigger('level.map', 'nothing', function(map) {
         var i, results, x, y;
         results = [];
@@ -59,9 +58,77 @@
         }
         return results;
       });
-      $('#testbut').on('click', function() {
-        console.log('send test msg from client');
-        return cc.test;
+      curPlayer = null;
+      frame2 = true;
+      animtick = function() {
+        if (curPlayer) {
+          if (frame2) {
+            ac.tile(1, 0, curPlayer.pos[0], curPlayer.pos[1]);
+            ac.tile(8, 0, curPlayer.pos[0], curPlayer.pos[1]);
+          } else {
+            ac.tile(1, 0, curPlayer.pos[0], curPlayer.pos[1]);
+            ac.tile(9, 0, curPlayer.pos[0], curPlayer.pos[1]);
+          }
+          return frame2 = !frame2;
+        }
+      };
+      setInterval(animtick, 500);
+      handlePlayer = function(ply) {
+        console.log(ply);
+        curPlayer = ply;
+        return ac.tile(8, 0, curPlayer.pos[0], curPlayer.pos[1]);
+      };
+      if (uid = localStorage.getItem('player_uid')) {
+        player_data = {
+          uid: uid
+        };
+        dispatcher.trigger('player.sign_in', player_data, function(player) {
+          console.log('existed user signed in');
+          return handlePlayer(player);
+        }, function(error_msg) {
+          console.log('something wrong:');
+          return console.log(error_msg);
+        });
+      } else {
+        dispatcher.trigger('player.create', '', function(player) {
+          console.log('new user created successfully');
+          handlePlayer(player);
+          return localStorage.setItem('player_uid', player.uid);
+        }, function(error_msg) {
+          console.log('User was not created by some reasons: ');
+          return console.log(error_msg);
+        });
+      }
+      $(document).bind("keydown", function(e) {
+        var dir, dirx, diry;
+        dir = null;
+        dirx = 0;
+        diry = 0;
+        if (e.keyCode === 37) {
+          dir = "left";
+        }
+        if (e.keyCode === 38) {
+          dir = "up";
+        }
+        if (e.keyCode === 39) {
+          dir = "right";
+        }
+        if (e.keyCode === 40) {
+          dir = "down";
+        }
+        if (dir) {
+          return dispatcher.trigger('player.move', {
+            player_uid: curPlayer.uid,
+            direction: dir
+          }, function(obj) {
+            console.log(obj);
+            ac.tile(1, 0, curPlayer.pos[0], curPlayer.pos[1]);
+            curPlayer.pos[0] = obj.pos.x;
+            return curPlayer.pos[1] = obj.pos.y;
+          }, function(error_msg) {
+            return console.log(error_msg);
+          });
+        }
       });
       return $('#reqmap').on('click', function() {
         return dispatcher.trigger('level.map', 'nothing', function(map) {
