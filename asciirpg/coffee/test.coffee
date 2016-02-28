@@ -59,7 +59,8 @@ dispatcher.on_open = (data) -> # если соединение с серверо
       if curPlayer.id == msg.id
         ac.tile 1, 0, curPlayer.pos.x, curPlayer.pos.y
         curPlayer.pos = msg.pos
-        updateTile( [8,0], curPlayer.pos)
+        #updateTile( [8,0], curPlayer.pos)
+        renderPlayers()
       else
         objectList[msg.id+""] = msg
 
@@ -134,9 +135,22 @@ dispatcher.on_open = (data) -> # если соединение с серверо
 
 
 
+
+
+
     #
-    # Animation
-    #    
+    # Animation & Scene Render
+    #
+    renderPlayers = ->
+      # Update other players
+      for k,v of objectList
+        updateTile( [8,1], v.pos)
+
+      # Update client player
+      updateTile( [8,0], curPlayer.pos)
+
+
+
     animtick = ->
       for x in [0..19]
         # ...
@@ -145,16 +159,10 @@ dispatcher.on_open = (data) -> # если соединение с серверо
           ac.tile 0, 0, x, y if g_map[x][y] == 1
           ac.tile 1, 0, x, y if g_map[x][y] == 0
 
-      if curPlayer
-        # Update other players
-        for k,v of objectList
-          updateTile( [8,1], v.pos)
+      #if curPlayer
+      renderPlayers() 
 
-
-        # Update client player
-        updateTile( [8,0], curPlayer.pos) 
-
-        frame2 = !frame2
+      frame2 = !frame2
     setInterval animtick, 500
     
 

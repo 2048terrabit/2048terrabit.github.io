@@ -27,7 +27,7 @@
   dispatcher.on_open = function(data) {
     console.log('Connection has been established');
     return $(function() {
-      var ac, animtick, curPlayer, frame2, g_map, handlePlayer, move_channel, objectList, player_data, sign_channel, t, uid, updateTile;
+      var ac, animtick, curPlayer, frame2, g_map, handlePlayer, move_channel, objectList, player_data, renderPlayers, sign_channel, t, uid, updateTile;
       objectList = {};
       g_map = null;
       ac = new cc(document.getElementById("canvas"), document.getElementById("tiles"));
@@ -54,7 +54,7 @@
         if (curPlayer.id === msg.id) {
           ac.tile(1, 0, curPlayer.pos.x, curPlayer.pos.y);
           curPlayer.pos = msg.pos;
-          return updateTile([8, 0], curPlayer.pos);
+          return renderPlayers();
         } else {
           return objectList[msg.id + ""] = msg;
         }
@@ -113,8 +113,16 @@
           return console.log(error_msg);
         });
       }
+      renderPlayers = function() {
+        var k, v;
+        for (k in objectList) {
+          v = objectList[k];
+          updateTile([8, 1], v.pos);
+        }
+        return updateTile([8, 0], curPlayer.pos);
+      };
       animtick = function() {
-        var i, j, k, v, x, y;
+        var i, j, x, y;
         for (x = i = 0; i <= 19; x = ++i) {
           for (y = j = 0; j <= 19; y = ++j) {
             if (g_map[x][y] === 1) {
@@ -125,14 +133,8 @@
             }
           }
         }
-        if (curPlayer) {
-          for (k in objectList) {
-            v = objectList[k];
-            updateTile([8, 1], v.pos);
-          }
-          updateTile([8, 0], curPlayer.pos);
-          return frame2 = !frame2;
-        }
+        renderPlayers();
+        return frame2 = !frame2;
       };
       setInterval(animtick, 500);
       t = 0;
