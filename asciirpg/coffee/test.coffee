@@ -9,7 +9,7 @@ class cc
     @ctx.fillStyle = "#fff"
     @ctx.fillRect(0,0,@c.width,@c.height)
   tile: (tx,ty, cx,cy) ->
-    @ctx.drawImage(@image, tx*16,ty*16,16,16,cx*16,cy*16,16,16)
+    @ctx.drawImage(@image, tx*16,ty*16,16,16,16+cx*16,16+cy*16,16,16)
 
 
 
@@ -50,12 +50,12 @@ dispatcher.on_open = (data) -> # если соединение с серверо
     sign_channel.bind 'signed_in', (msg) ->
       console.log "Player with id joined: " + msg.id
       console.log msg
-      #objectList[msg.id+""] = msg
+      objectList[msg.id+""] = msg
 
     move_channel = dispatcher.subscribe('player')
     move_channel.bind 'move', (msg) ->
-      console.log "Player with id moved: " + msg.id
-      console.log msg
+      #console.log "Player with id moved: " + msg.id
+      #console.log msg
       if curPlayer.id == msg.id
         ac.tile 1, 0, curPlayer.pos.x, curPlayer.pos.y
         curPlayer.pos = msg.pos
@@ -63,6 +63,13 @@ dispatcher.on_open = (data) -> # если соединение с серверо
         renderPlayers()
       else
         objectList[msg.id+""] = msg
+    
+    disconnect_channel = dispatcher.subscribe('player')
+    disconnect_channel.bind 'disconnected', (msg) ->
+      console.log "Disconnected message:"
+      console.log msg
+
+
 
 
 
@@ -82,12 +89,11 @@ dispatcher.on_open = (data) -> # если соединение с серверо
       # Initial map loading & drawing
       dispatcher.trigger 'level.get_map', { player_uid: curPlayer.uid }, (map) ->
         g_map = map
-        for x in [0..19]
+        for x in [-1..20]
           # ...
-          for y in [0..19]
+          for y in [-1..20]
             # ...
-            ac.tile 0, 0, x, y if map[x][y] == 1
-            ac.tile 1, 0, x, y if map[x][y] == 0
+            ac.tile 0, 0, x, y
 
         updateTile( [8,0], curPlayer.pos)
 
@@ -150,13 +156,35 @@ dispatcher.on_open = (data) -> # если соединение с серверо
       updateTile( [8,0], curPlayer.pos)
 
 
+    checkMapTile = (x,y) ->
+      if !(x >= 0 && x < 20) 
+        return 1
+      if !(y >= 0 && y < 20) 
+        return 1
+      return g_map[x][y]
 
     animtick = ->
       for x in [0..19]
         # ...
         for y in [0..19]
           # ...
-          ac.tile 0, 0, x, y if g_map[x][y] == 1
+          if g_map[x][y] == 1
+
+            #middle
+            ac.tile 0, 0, x, y
+
+            # north
+            if checkMapTile(x,y+1) == 0
+              ac.tile 0, 1, x, y
+            # east
+            #if checkMapTile(x-1,y) == 0
+            #  ac.tile 0, 2, x, y
+            # south
+            #if checkMapTile(x,y-1) == 0
+            #  ac.tile 0, 3, x, y
+            # west
+            #if checkMapTile(x+1,y) == 0
+            #  ac.tile 0, 4, x, y
           ac.tile 1, 0, x, y if g_map[x][y] == 0
 
       #if curPlayer
@@ -210,8 +238,11 @@ dispatcher.on_open = (data) -> # если соединение с серверо
         for x in [0..19]
           # ...
           for y in [0..19]
-            # ...
-            ac.tile 0, 0, x, y if map[x][y] == 1
+            # wall
+            if map[x][y] == 1
+              ac.tile 0, 0, x, y
+              ac.tile 0, 1, x, y+1
+            # floor
             ac.tile 1, 0, x, y if map[x][y] == 0
         
         

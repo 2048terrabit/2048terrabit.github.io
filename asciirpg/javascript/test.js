@@ -15,7 +15,7 @@
     };
 
     cc.prototype.tile = function(tx, ty, cx, cy) {
-      return this.ctx.drawImage(this.image, tx * 16, ty * 16, 16, 16, cx * 16, cy * 16, 16, 16);
+      return this.ctx.drawImage(this.image, tx * 16, ty * 16, 16, 16, 16 + cx * 16, 16 + cy * 16, 16, 16);
     };
 
     return cc;
@@ -27,7 +27,7 @@
   dispatcher.on_open = function(data) {
     console.log('Connection has been established');
     return $(function() {
-      var ac, animtick, curPlayer, frame2, g_map, handlePlayer, move_channel, objectList, player_data, renderPlayers, sign_channel, t, uid, updateTile;
+      var ac, animtick, checkMapTile, curPlayer, disconnect_channel, frame2, g_map, handlePlayer, move_channel, objectList, player_data, renderPlayers, sign_channel, t, uid, updateTile;
       objectList = {};
       g_map = null;
       ac = new cc(document.getElementById("canvas"), document.getElementById("tiles"));
@@ -45,12 +45,11 @@
       sign_channel = dispatcher.subscribe('player');
       sign_channel.bind('signed_in', function(msg) {
         console.log("Player with id joined: " + msg.id);
-        return console.log(msg);
+        console.log(msg);
+        return objectList[msg.id + ""] = msg;
       });
       move_channel = dispatcher.subscribe('player');
       move_channel.bind('move', function(msg) {
-        console.log("Player with id moved: " + msg.id);
-        console.log(msg);
         if (curPlayer.id === msg.id) {
           ac.tile(1, 0, curPlayer.pos.x, curPlayer.pos.y);
           curPlayer.pos = msg.pos;
@@ -58,6 +57,11 @@
         } else {
           return objectList[msg.id + ""] = msg;
         }
+      });
+      disconnect_channel = dispatcher.subscribe('player');
+      disconnect_channel.bind('disconnected', function(msg) {
+        console.log("Disconnected message:");
+        return console.log(msg);
       });
       curPlayer = null;
       handlePlayer = function(ply) {
@@ -68,14 +72,9 @@
         }, function(map) {
           var i, j, x, y;
           g_map = map;
-          for (x = i = 0; i <= 19; x = ++i) {
-            for (y = j = 0; j <= 19; y = ++j) {
-              if (map[x][y] === 1) {
-                ac.tile(0, 0, x, y);
-              }
-              if (map[x][y] === 0) {
-                ac.tile(1, 0, x, y);
-              }
+          for (x = i = -1; i <= 20; x = ++i) {
+            for (y = j = -1; j <= 20; y = ++j) {
+              ac.tile(0, 0, x, y);
             }
           }
           return updateTile([8, 0], curPlayer.pos);
@@ -121,12 +120,24 @@
         }
         return updateTile([8, 0], curPlayer.pos);
       };
+      checkMapTile = function(x, y) {
+        if (!(x >= 0 && x < 20)) {
+          return 1;
+        }
+        if (!(y >= 0 && y < 20)) {
+          return 1;
+        }
+        return g_map[x][y];
+      };
       animtick = function() {
         var i, j, x, y;
         for (x = i = 0; i <= 19; x = ++i) {
           for (y = j = 0; j <= 19; y = ++j) {
             if (g_map[x][y] === 1) {
               ac.tile(0, 0, x, y);
+              if (checkMapTile(x, y + 1) === 0) {
+                ac.tile(0, 1, x, y);
+              }
             }
             if (g_map[x][y] === 0) {
               ac.tile(1, 0, x, y);
@@ -178,6 +189,7 @@
             for (y = j = 0; j <= 19; y = ++j) {
               if (map[x][y] === 1) {
                 ac.tile(0, 0, x, y);
+                ac.tile(0, 1, x, y + 1);
               }
               if (map[x][y] === 0) {
                 ac.tile(1, 0, x, y);

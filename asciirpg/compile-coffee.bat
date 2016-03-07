@@ -1,0 +1,1 @@
+coffee -o javascript/ -cw coffee/
