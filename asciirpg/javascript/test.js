@@ -27,7 +27,7 @@
   dispatcher.on_open = function(data) {
     console.log('Connection has been established');
     return $(function() {
-      var ac, animtick, checkMapTile, curPlayer, disconnect_channel, frame2, g_map, handlePlayer, move_channel, objectList, player_data, renderPlayers, sign_channel, t, uid, updateTile;
+      var ac, animtick, checkMapTile, curPlayer, disconnect_channel, frame2, g_map, handlePlayer, objectList, player_channel, player_data, renderPlayers, showPlayers, t, uid, updateTile;
       objectList = {};
       g_map = null;
       ac = new cc(document.getElementById("canvas"), document.getElementById("tiles"));
@@ -42,14 +42,13 @@
           return ac.tile(tile[0] + 1, tile[1], pos.x, pos.y);
         }
       };
-      sign_channel = dispatcher.subscribe('player');
-      sign_channel.bind('signed_in', function(msg) {
+      player_channel = dispatcher.subscribe('player');
+      player_channel.bind('signed_in', function(msg) {
         console.log("Player with id joined: " + msg.id);
         console.log(msg);
         return objectList[msg.id + ""] = msg;
       });
-      move_channel = dispatcher.subscribe('player');
-      move_channel.bind('move', function(msg) {
+      player_channel.bind('move', function(msg) {
         if (curPlayer.id === msg.id) {
           ac.tile(1, 0, curPlayer.pos.x, curPlayer.pos.y);
           curPlayer.pos = msg.pos;
@@ -60,28 +59,27 @@
       });
       disconnect_channel = dispatcher.subscribe('players');
       disconnect_channel.bind('disconnected', function(msg) {
-        var i, id, len, ref, results;
+        var id, j, len, ref, results;
         console.log("Disconnected message:");
         console.log(msg);
-        ref = msg[0];
+        ref = msg['player_disconnected_ids'];
         results = [];
-        for (i = 0, len = ref.length; i < len; i++) {
-          id = ref[i];
+        for (j = 0, len = ref.length; j < len; j++) {
+          id = ref[j];
           results.push(objectList.splice(id, 1));
         }
         return results;
       });
       curPlayer = null;
       handlePlayer = function(ply) {
-        console.log(ply);
         curPlayer = ply;
         dispatcher.trigger('level.get_map', {
           player_uid: curPlayer.uid
         }, function(map) {
-          var i, j, x, y;
+          var j, k, x, y;
           g_map = map;
-          for (x = i = -1; i <= 20; x = ++i) {
-            for (y = j = -1; j <= 20; y = ++j) {
+          for (x = j = -1; j <= 20; x = ++j) {
+            for (y = k = -1; k <= 20; y = ++k) {
               ac.tile(0, 0, x, y);
             }
           }
@@ -90,13 +88,13 @@
         return dispatcher.trigger('level.get_players', {
           player_uid: curPlayer.uid
         }, function(players) {
-          var i, len, x;
-          console.log("Got players:");
-          for (i = 0, len = players.length; i < len; i++) {
-            x = players[i];
-            objectList[x.id + ""] = x;
+          var j, len, results, x;
+          results = [];
+          for (j = 0, len = players.length; j < len; j++) {
+            x = players[j];
+            results.push(objectList[x.id + ""] = x);
           }
-          return console.log(objectList);
+          return results;
         });
       };
       if (uid = localStorage.getItem('player_uid')) {
@@ -120,11 +118,18 @@
           return console.log(error_msg);
         });
       }
+      showPlayers = function() {
+        console.log(objectList);
+        return console.log(curPlayer);
+      };
+      window.showPlayers = showPlayers;
       renderPlayers = function() {
-        var k, v;
-        for (k in objectList) {
-          v = objectList[k];
-          updateTile([8, 1], v.pos);
+        var i, j, len, o;
+        for (i = j = 0, len = objectList.length; j < len; i = ++j) {
+          o = objectList[i];
+          if (curPlayer.id !== objectList[i].id) {
+            updateTile([8, 1], o.pos);
+          }
         }
         return updateTile([8, 0], curPlayer.pos);
       };
@@ -138,9 +143,9 @@
         return g_map[x][y];
       };
       animtick = function() {
-        var i, j, x, y;
-        for (x = i = 0; i <= 19; x = ++i) {
-          for (y = j = 0; j <= 19; y = ++j) {
+        var j, k, x, y;
+        for (x = j = 0; j <= 19; x = ++j) {
+          for (y = k = 0; k <= 19; y = ++k) {
             if (g_map[x][y] === 1) {
               ac.tile(0, 0, x, y);
               if (checkMapTile(x, y + 1) === 0) {
@@ -191,10 +196,10 @@
       });
       return $('#reqmap').on('click', function() {
         return dispatcher.trigger('level.map', 'nothing', function(map) {
-          var i, j, x, y;
+          var j, k, x, y;
           console.log(map);
-          for (x = i = 0; i <= 19; x = ++i) {
-            for (y = j = 0; j <= 19; y = ++j) {
+          for (x = j = 0; j <= 19; x = ++j) {
+            for (y = k = 0; k <= 19; y = ++k) {
               if (map[x][y] === 1) {
                 ac.tile(0, 0, x, y);
                 ac.tile(0, 1, x, y + 1);

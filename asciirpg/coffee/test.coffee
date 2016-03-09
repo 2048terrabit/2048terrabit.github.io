@@ -46,14 +46,15 @@ dispatcher.on_open = (data) -> # если соединение с серверо
 
 
 
-    sign_channel = dispatcher.subscribe('player')
-    sign_channel.bind 'signed_in', (msg) ->
+    player_channel = dispatcher.subscribe('player')
+
+    player_channel.bind 'signed_in', (msg) ->
       console.log "Player with id joined: " + msg.id
       console.log msg
       objectList[msg.id+""] = msg
 
-    move_channel = dispatcher.subscribe('player')
-    move_channel.bind 'move', (msg) ->
+
+    player_channel.bind 'move', (msg) ->
       #console.log "Player with id moved: " + msg.id
       #console.log msg
       if curPlayer.id == msg.id
@@ -64,11 +65,14 @@ dispatcher.on_open = (data) -> # если соединение с серверо
       else
         objectList[msg.id+""] = msg
     
+
+
+
     disconnect_channel = dispatcher.subscribe('players')
     disconnect_channel.bind 'disconnected', (msg) ->
       console.log "Disconnected message:"
       console.log msg
-      for id in msg[0]
+      for id in msg['player_disconnected_ids']
         objectList.splice(id, 1)
 
 
@@ -84,7 +88,7 @@ dispatcher.on_open = (data) -> # если соединение с серверо
     curPlayer = null
 
     handlePlayer = (ply) ->
-      console.log ply
+      #console.log ply
       curPlayer = ply
 
 
@@ -102,10 +106,11 @@ dispatcher.on_open = (data) -> # если соединение с серверо
 
       # Get info about players on map
       dispatcher.trigger 'level.get_players', { player_uid: curPlayer.uid }, (players) ->
-        console.log "Got players:"
         for x in players
           objectList[x.id+""] = x
-        console.log objectList
+
+        #console.log "Got players:"
+        #console.log objectList
 
 
 
@@ -143,7 +148,10 @@ dispatcher.on_open = (data) -> # если соединение с серверо
 
 
 
-
+    showPlayers = ->
+      console.log objectList
+      console.log curPlayer
+    window.showPlayers = showPlayers
 
 
     #
@@ -151,8 +159,9 @@ dispatcher.on_open = (data) -> # если соединение с серверо
     #
     renderPlayers = ->
       # Update other players
-      for k,v of objectList
-        updateTile( [8,1], v.pos)
+      for o,i in objectList
+        if curPlayer.id != objectList[i].id
+          updateTile( [8,1], o.pos)
 
       # Update client player
       updateTile( [8,0], curPlayer.pos)
