@@ -124,14 +124,17 @@
       };
       window.showPlayers = showPlayers;
       renderPlayers = function() {
-        var i, j, len, o;
-        for (i = j = 0, len = objectList.length; j < len; i = ++j) {
+        var i, o, results;
+        results = [];
+        for (i in objectList) {
           o = objectList[i];
-          if (curPlayer.id !== objectList[i].id) {
-            updateTile([8, 1], o.pos);
+          if (curPlayer.id === o.id) {
+            results.push(updateTile([8, 0], curPlayer.pos));
+          } else {
+            results.push(updateTile([8, 1], o.pos));
           }
         }
-        return updateTile([8, 0], curPlayer.pos);
+        return results;
       };
       checkMapTile = function(x, y) {
         if (!(x >= 0 && x < 20)) {

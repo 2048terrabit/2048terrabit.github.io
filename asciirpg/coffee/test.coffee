@@ -159,12 +159,13 @@ dispatcher.on_open = (data) -> # если соединение с серверо
     #
     renderPlayers = ->
       # Update other players
-      for o,i in objectList
-        if curPlayer.id != objectList[i].id
+      for i,o of objectList
+        if curPlayer.id == o.id
+          # Update client player
+          updateTile( [8,0], curPlayer.pos)
+        else
           updateTile( [8,1], o.pos)
 
-      # Update client player
-      updateTile( [8,0], curPlayer.pos)
 
 
     checkMapTile = (x,y) ->
