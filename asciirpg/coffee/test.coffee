@@ -64,10 +64,12 @@ dispatcher.on_open = (data) -> # если соединение с серверо
       else
         objectList[msg.id+""] = msg
     
-    disconnect_channel = dispatcher.subscribe('player')
+    disconnect_channel = dispatcher.subscribe('players')
     disconnect_channel.bind 'disconnected', (msg) ->
       console.log "Disconnected message:"
       console.log msg
+      for id in msg[0]
+        objectList.splice(id, 1)
 
 
 

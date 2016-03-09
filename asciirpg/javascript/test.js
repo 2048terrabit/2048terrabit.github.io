@@ -58,10 +58,18 @@
           return objectList[msg.id + ""] = msg;
         }
       });
-      disconnect_channel = dispatcher.subscribe('player');
+      disconnect_channel = dispatcher.subscribe('players');
       disconnect_channel.bind('disconnected', function(msg) {
+        var i, id, len, ref, results;
         console.log("Disconnected message:");
-        return console.log(msg);
+        console.log(msg);
+        ref = msg[0];
+        results = [];
+        for (i = 0, len = ref.length; i < len; i++) {
+          id = ref[i];
+          results.push(objectList.splice(id, 1));
+        }
+        return results;
       });
       curPlayer = null;
       handlePlayer = function(ply) {
