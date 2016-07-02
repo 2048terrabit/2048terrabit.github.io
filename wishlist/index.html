@@ -61,21 +61,17 @@ function getJSONData (id,cc)
     //     error: function() { console.log("error2"); } 
     // });
     $.ajax({
-        url: "https://steamdb.info/api/GetPriceHistory/?appid="+id+"&cc=" + cc +"&callback=?",
+        url: "https://steamdb.info/api/GetPriceHistory/?appid="+id+"&cc=" + cc,
         cache: true,
         dataType: "json",
         crossDomain: true,
-        jsonpCallback:'test',
+        //jsonpCallback:'test',
         success: function(data) {
 
             console.log(data);
 
         }, 
         error: function() { console.log("error2"); } 
-    });
-    $.get("http://steamdb.info/api/GetPriceHistory/?appid="+id+"&cc=" + cc,function(data) {
-        console.log('data ', data);
-        
     });
 }
 
