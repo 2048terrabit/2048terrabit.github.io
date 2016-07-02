@@ -45,17 +45,30 @@ function getJSONData (id,cc)
     //     }, 
     //     error: function() { console.log("error2"); } 
     // });
+    // $.ajax({
+    //     url: "http://wishlistcalc-861st.rhcloud.com/list?id="+ id +"&cc="+ cc +"&callback=?",
+    //     cache: true,
+    //     dataType: "json",
+    //     crossDomain: true,
+    //     jsonpCallback:'test',
+    //     success: function(data) {
+
+    //         for(i in data) {
+    //             console.log(i);
+    //         }
+
+    //     }, 
+    //     error: function() { console.log("error2"); } 
+    // });
     $.ajax({
-        url: "http://wishlistcalc-861st.rhcloud.com/list?id="+ id +"&cc="+ cc +"&callback=?",
+        url: "https://steamdb.info/api/GetPriceHistory/?appid="+id+"&cc=" + cc +"&callback=?",
         cache: true,
         dataType: "json",
         crossDomain: true,
         jsonpCallback:'test',
         success: function(data) {
 
-            for(i in data) {
-                console.log(i);
-            }
+            console.log(data);
 
         }, 
         error: function() { console.log("error2"); } 
