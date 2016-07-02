@@ -46,10 +46,11 @@ function getJSONData (id,cc)
     //     error: function() { console.log("error2"); } 
     // });
     $.ajax({
-        method: "GET",
-        url: "http://wishlistcalc-861st.rhcloud.com/list?id="+ id +"&cc="+ cc,
-        dataType: "jsonp",
+        url: "http://wishlistcalc-861st.rhcloud.com/list?id="+ id +"&cc="+ cc +"&callback=?",
+        cache: true,
+        dataType: "json",
         crossDomain: true,
+        jsonpCallback:'test',
         success: function(data) {
 
             for(i in data) {
