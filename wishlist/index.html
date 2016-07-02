@@ -48,6 +48,7 @@ function getJSONData (id,cc)
     $.ajax({
         method: "GET",
         url: "http://wishlistcalc-861st.rhcloud.com/list?id="+ id +"&cc="+ cc,
+        dataType: "jsonp",
         crossDomain: true,
         success: function(data) {
 
